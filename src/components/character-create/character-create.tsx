@@ -20,6 +20,10 @@ import {
 } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const classOptions = [
   { id: 0, name: "Artificer" },
@@ -614,11 +618,18 @@ export default function CharacterCreate(props: CharacterCreateProps) {
 
   // Handler for Add Spells button
   const handleAddSpells = () => {
-    // You can implement what happens when spells are added here
-    setAddedSpells((prev) => [
-      ...prev,
-      ...filteredSpells.filter((spell) => selectedSpellTitles.includes(spell.title) && !prev.some((s) => s.title === spell.title)),
-    ]);
+    setAddedSpells((prev) => {
+      const newSpells = [
+        ...prev,
+        ...filteredSpells.filter(
+          (spell) =>
+            selectedSpellTitles.includes(spell.title) &&
+            !prev.some((s) => s.title === spell.title)
+        ),
+      ];
+      // Sort spells by level
+      return newSpells.sort((a, b) => a.spellLevel - b.spellLevel);
+    });
     setSelectedSpellTitles([]);
   };
 
@@ -732,141 +743,152 @@ export default function CharacterCreate(props: CharacterCreateProps) {
 
   return (
     <Box className="character-create-container" sx={{ width: "100%" }}>
-      <Box sx={{ display: 'block' }} component="form" className="form-container">
-        <FormControl fullWidth margin="normal" className="name-input-control">
-          <TextField
-            id="name"
-            label="Name"
-            variant="outlined"
-            value={characterName}
-            onChange={(e) => setCharacterName(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="class-select-label">Classes</InputLabel>
-          <Select
-            labelId="class-select-label"
-            id="class-select"
-            multiple
-            value={selectedClassIds}
-            onChange={handleClassSelectionChange}
-            input={<OutlinedInput label="Classes" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((id) => {
-                  const classOption = classOptions.find((c) => c.id === id);
-                  return (
-                    <Chip
-                      key={id}
-                      label={classOption?.name}
-                      size="small"
-                    />
-                  );
-                })}
-              </Box>
-            )}
-          >
-            {classOptions.map((classOption) => (
-              <MenuItem key={classOption.id} value={classOption.id}>
-                <Checkbox checked={selectedClassIds.indexOf(classOption.id) > -1} />
-                {classOption.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {selectedClassIds.map((classId) => {
-          const classOption = classOptions.find((c) => c.id === classId);
-          if (!classOption) return null;
-
-          return (
-            <Box key={classId} className="level-input-container">
-              <Typography variant="subtitle1" className="level-label">
-                {classOption.name} Level:
-              </Typography>
+      <Accordion defaultExpanded>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="character-form-content"
+          id="character-form-header"
+        >
+          <Typography variant="h6">Character Form</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box sx={{ display: 'block' }} component="form" className="form-container">
+            <FormControl fullWidth margin="normal" className="name-input-control">
               <TextField
-                type="number"
+                id="name"
+                label="Name"
                 variant="outlined"
-                size="small"
-                value={classLevels[classId] || 1}
-                onChange={(e) => handleLevelChange(classId, e.target.value)}
-                inputProps={{ min: 1 }}
-                className="level-input"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
               />
-              <Typography variant="subtitle2" sx={{ marginTop: 1 }}>
-                Spell Save DC: {getSpellSaveDC(classOption.name) ?? "N/A"}
-              </Typography>
-              <Typography variant="subtitle2" sx={{ marginTop: 1 }}>
-                Spell Attack Bonus: {getSpellAttackBonus(classOption.name) ?? "N/A"}
-              </Typography>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="class-select-label">Classes</InputLabel>
+              <Select
+                labelId="class-select-label"
+                id="class-select"
+                multiple
+                value={selectedClassIds}
+                onChange={handleClassSelectionChange}
+                input={<OutlinedInput label="Classes" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((id) => {
+                      const classOption = classOptions.find((c) => c.id === id);
+                      return (
+                        <Chip
+                          key={id}
+                          label={classOption?.name}
+                          size="small"
+                        />
+                      );
+                    })}
+                  </Box>
+                )}
+              >
+                {classOptions.map((classOption) => (
+                  <MenuItem key={classOption.id} value={classOption.id}>
+                    <Checkbox checked={selectedClassIds.indexOf(classOption.id) > -1} />
+                    {classOption.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {selectedClassIds.map((classId) => {
+              const classOption = classOptions.find((c) => c.id === classId);
+              if (!classOption) return null;
+
+              return (
+                <Box key={classId} className="level-input-container">
+                  <Typography variant="subtitle1" className="level-label">
+                    {classOption.name} Level:
+                  </Typography>
+                  <TextField
+                    type="number"
+                    variant="outlined"
+                    size="small"
+                    value={classLevels[classId] || 1}
+                    onChange={(e) => handleLevelChange(classId, e.target.value)}
+                    inputProps={{ min: 1 }}
+                    className="level-input"
+                  />
+                  <Typography variant="subtitle2" sx={{ marginTop: 1 }}>
+                    Spell Save DC: {getSpellSaveDC(classOption.name) ?? "N/A"}
+                  </Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: 1 }}>
+                    Spell Attack Bonus: {getSpellAttackBonus(classOption.name) ?? "N/A"}
+                  </Typography>
+                </Box>
+              );
+            })}
+            <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 1 }}>
+              Ability Scores
+            </Typography>
+            <Box className="ability-scores-container">
+              <FormControl margin="normal" className="ability-score-form-control">
+                <TextField
+                  label="Intelligence"
+                  type="number"
+                  variant="outlined"
+                  size="small"
+                  value={abilityScores.intelligence}
+                  onChange={(e) =>
+                    handleAbilityScoreChange("intelligence", e.target.value)
+                  }
+                  inputProps={{ min: 1, max: 30 }}
+                  className="ability-score-input"
+                />
+              </FormControl>
+              <FormControl margin="normal" className="ability-score-form-control">
+                <TextField
+                  label="Wisdom"
+                  type="number"
+                  variant="outlined"
+                  size="small"
+                  value={abilityScores.wisdom}
+                  onChange={(e) =>
+                    handleAbilityScoreChange("wisdom", e.target.value)
+                  }
+                  inputProps={{ min: 1, max: 30 }}
+                  className="ability-score-input"
+                />
+              </FormControl>
+              <FormControl margin="normal" className="ability-score-form-control">
+                <TextField
+                  label="Charisma"
+                  type="number"
+                  variant="outlined"
+                  size="small"
+                  value={abilityScores.charisma}
+                  onChange={(e) =>
+                    handleAbilityScoreChange("charisma", e.target.value)
+                  }
+                  inputProps={{ min: 1, max: 30 }}
+                  className="ability-score-input"
+                />
+              </FormControl>
             </Box>
-          );
-        })}
-        <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 1 }}>
-          Ability Scores
-        </Typography>
-        <Box className="ability-scores-container">
-          <FormControl margin="normal" className="ability-score-form-control">
-            <TextField
-              label="Intelligence"
-              type="number"
-              variant="outlined"
-              size="small"
-              value={abilityScores.intelligence}
-              onChange={(e) =>
-                handleAbilityScoreChange("intelligence", e.target.value)
-              }
-              inputProps={{ min: 1, max: 30 }}
-              className="ability-score-input"
-            />
-          </FormControl>
-          <FormControl margin="normal" className="ability-score-form-control">
-            <TextField
-              label="Wisdom"
-              type="number"
-              variant="outlined"
-              size="small"
-              value={abilityScores.wisdom}
-              onChange={(e) =>
-                handleAbilityScoreChange("wisdom", e.target.value)
-              }
-              inputProps={{ min: 1, max: 30 }}
-              className="ability-score-input"
-            />
-          </FormControl>
-          <FormControl margin="normal" className="ability-score-form-control">
-            <TextField
-              label="Charisma"
-              type="number"
-              variant="outlined"
-              size="small"
-              value={abilityScores.charisma}
-              onChange={(e) =>
-                handleAbilityScoreChange("charisma", e.target.value)
-              }
-              inputProps={{ min: 1, max: 30 }}
-              className="ability-score-input"
-            />
-          </FormControl>
-        </Box>
-        <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={handleSaveToLocalStorage}
-          >
-            Save
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleNewCharacter}
-          >
-            New Character
-          </Button>
-        </Box>
-      </Box>
+            <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleSaveToLocalStorage}
+              >
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleNewCharacter}
+              >
+                New Character
+              </Button>
+            </Box>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
       {availableSpells.length > 0 && (
         <Box className="slots-container" sx={{ display: 'block', marginBottom: 2, width: "100%", marginLeft: 4 }}>
           {/* Spell Slots */}
@@ -1051,8 +1073,16 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 {classOption.name}
               </MenuItem>
             ))}
+            
           </TextField>
-
+          <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddSpells}
+              disabled={selectedSpellTitles.length === 0}
+            >
+              Add Spells
+            </Button>
           {/* Spellbook Table */}
           {addedSpells.length > 0 && (
             <Box sx={{ marginBottom: 2 }}>
@@ -1142,7 +1172,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
           >
             {showSpellTable ? "Hide Available Spells Table" : "Show Available Spells Table"}
           </Button>
-
+          
           {/* Available Spells Table */}
           {showSpellTable && (
             <TableContainer component={Paper} sx={{ marginTop: 2, width: "100%" }}>
@@ -1184,12 +1214,15 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                         </TableCell>
                       </TableRow>
                     )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+            
           </Box>
-        )}
-      </Box>
-    );
-  }
+        </Box>
+      )}
+    </Box>
+  );
+}
