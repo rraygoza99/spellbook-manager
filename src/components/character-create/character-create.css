@@ -1,0 +1,66 @@
+.form-container {
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: auto;
+  float: left;
+  margin-top: 10px;
+}
+
+
+.level-input-container {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.level-label {
+  margin-right: 16px;
+  min-width: 120px;
+}
+
+.level-input {
+  width: 100px;
+}
+
+.name-input-control {
+  margin-bottom: 20px;
+}
+.ability-scores-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.ability-score-form-control {
+  flex-grow: 1;
+  min-width: 120px;
+}
+
+.ability-score-input .MuiInputBase-input {
+  width: 100%;
+}
+
+.MuiTableContainer-root {
+  width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .character-create-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-container {
+    order: 1;
+    margin-bottom: 16px;
+  }
+
+  .slots-container {
+    order: 2;
+  }
+}
