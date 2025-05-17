@@ -653,6 +653,12 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     setSelectedAddedSpellTitles([]);
   };
 
+  // Save spell slots for the current character to local storage after saving the character
+  const saveSpellSlotsToLocalStorage = (characterName: string) => {
+    localStorage.setItem(`spell-slots-${characterName}`, JSON.stringify(spellSlots));
+    localStorage.setItem(`warlock-spell-slots-${characterName}`, JSON.stringify(warlockSpellSlots));
+  };
+
   // Handler to save character data to localStorage as JSON
   const handleSaveToLocalStorage = () => {
     const characterData = {
@@ -677,6 +683,10 @@ export default function CharacterCreate(props: CharacterCreateProps) {
       arr.push(characterData);
     }
     localStorage.setItem("character-create-list", JSON.stringify(arr));
+
+    // Save spell slots after saving the character
+    saveSpellSlotsToLocalStorage(characterName);
+
     if (props.onSave) props.onSave(characterData);
   };
 
@@ -740,6 +750,50 @@ export default function CharacterCreate(props: CharacterCreateProps) {
   function needsSavingThrow(spell: any): boolean {
     return spell.tags.includes("needs_save");
   }
+
+  // State for theme selection
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
+
+  // Save theme to local storage
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
+  // Load spell slots for the current character from local storage
+  React.useEffect(() => {
+    if (characterName) {
+      const savedSpellSlots = localStorage.getItem(`spell-slots-${characterName}`);
+      if (savedSpellSlots) {
+        setSpellSlots(JSON.parse(savedSpellSlots));
+      }
+      const savedWarlockSpellSlots = localStorage.getItem(`warlock-spell-slots-${characterName}`);
+      if (savedWarlockSpellSlots) {
+        setWarlockSpellSlots(JSON.parse(savedWarlockSpellSlots));
+      }
+    }
+  }, [characterName]);
+
+  // Handler to remove a character and its associated spell slot data
+  const handleRemoveCharacter = (characterNameToRemove: string) => {
+    let arr: any[] = [];
+    try {
+      arr = JSON.parse(localStorage.getItem("character-create-list") || "[]");
+      if (!Array.isArray(arr)) arr = [];
+    } catch {
+      arr = [];
+    }
+
+    // Remove the character from the list
+    const updatedArr = arr.filter((c) => c.characterName !== characterNameToRemove);
+    localStorage.setItem("character-create-list", JSON.stringify(updatedArr));
+
+    // Remove associated spell slot data
+    localStorage.removeItem(`spell-slots-${characterNameToRemove}`);
+    localStorage.removeItem(`warlock-spell-slots-${characterNameToRemove}`);
+  };
 
   return (
     <Box className="character-create-container" sx={{ width: "100%" }}>
@@ -931,6 +985,13 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 onClick={handleNewCharacter}
               >
                 New Character
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={() => handleThemeChange(theme === "light" ? "dark" : "light")}
+              >
+                Toggle Theme
               </Button>
             </Box>
           </Box>
