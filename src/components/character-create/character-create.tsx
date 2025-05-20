@@ -756,12 +756,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return localStorage.getItem("theme") || "light";
   });
 
-  // Save theme to local storage
-  const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
-
   // Load spell slots for the current character from local storage
   React.useEffect(() => {
     if (characterName) {
@@ -986,13 +980,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               >
                 New Character
               </Button>
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={() => handleThemeChange(theme === "light" ? "dark" : "light")}
-              >
-                Toggle Theme
-              </Button>
+              
             </Box>
           </Box>
         </AccordionDetails>
