@@ -305,7 +305,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return abilityModifier + proficiencyBonus;
   }
 
-  // Compute available spells for selected classes and levels
   const availableSpells = useMemo(() => {
     if (!selectedClasses.length) return [];
     const spells: any[] = [];
@@ -321,7 +320,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
         }
       }
     }
-    // Deduplicate by title
     const unique = new Map();
     for (const s of spells) {
       unique.set(s.title, s);
@@ -705,7 +703,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 color="secondary"
                 onClick={handleSaveToLocalStorage}
               >
-                Save
+                Save Character
               </Button>
               <Button
                 variant="outlined"

@@ -4,7 +4,6 @@ import { Box, Button, Typography, Switch, FormControlLabel, CssBaseline } from "
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CharacterCreate from "./components/character-create/character-create";
 
-// Helper to get character by name from localStorage
 function getCharacterByName(name: string) {
   try {
     const arr = JSON.parse(localStorage.getItem("character-create-list") || "[]");
@@ -15,7 +14,6 @@ function getCharacterByName(name: string) {
   }
 }
 
-// Place this at the top, outside the Home component, so it's available for mapping class ids to names
 const classOptions = [
   { id: 0, name: "Artificer" },
   { id: 2, name: "Bard" },
@@ -27,10 +25,8 @@ const classOptions = [
   { id: 12, name: "Wizard" },
 ];
 
-// Theme context for child components if needed
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
-// Home page component with saved characters list
 function Home() {
   const [refresh, setRefresh] = useState(0);
 
@@ -54,17 +50,19 @@ function Home() {
     return [];
   }
 
-  // Remove character by name and refresh list
   function handleDeleteCharacter(characterName: string) {
     let arr = getSavedCharacters();
     arr = arr.filter((c) => c.characterName !== characterName);
     localStorage.setItem("character-create-list", JSON.stringify(arr));
+    
+    localStorage.removeItem(`spell-slots-${characterName}`);
+    localStorage.removeItem(`warlock-spell-slots-${characterName}`);
+    
     setRefresh((r) => r + 1);
   }
 
   const savedCharacters = getSavedCharacters();
 
-  // Helper to get class name by id
   function getClassNameById(id: number) {
     const found = classOptions.find((c) => c.id === id);
     return found ? found.name : id;
@@ -136,7 +134,6 @@ function Home() {
   );
 }
 
-// CharacterCreate wrapper to load data from query param
 function CharacterCreateWithQuery() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -191,6 +188,22 @@ function App() {
                 Character Spellbook
               </Button>
               <Box sx={{ flex: 1 }} />
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => {
+                  localStorage.removeItem("character-create-list");
+                  localStorage.removeItem("character-create-data");
+                  Object.keys(localStorage).forEach((key) => {
+                    if (key.startsWith("spell-slots-") || key.startsWith("warlock-spell-slots-")) {
+                      localStorage.removeItem(key);
+                    }
+                  });
+                  window.location.reload(); // Refresh to reflect changes
+                }}
+              >
+                Clear All Data
+              </Button>
               <FormControlLabel
                 control={
                   <Switch
