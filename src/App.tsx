@@ -153,12 +153,19 @@ function CharacterCreateWithQuery() {
 }
 
 function App() {
-  const [mode, setMode] = useState<"light" | "dark">("light");
+  const [mode, setMode] = useState<"light" | "dark">(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark" ? "dark" : "light";
+  });
 
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prev) => (prev === "light" ? "dark" : "light"));
+        setMode((prev) => {
+          const newMode = prev === "light" ? "dark" : "light";
+          localStorage.setItem("theme", newMode);
+          return newMode;
+        });
       },
     }),
     []
@@ -199,7 +206,7 @@ function App() {
                       localStorage.removeItem(key);
                     }
                   });
-                  window.location.reload(); // Refresh to reflect changes
+                  window.location.reload();
                 }}
               >
                 Clear All Data
