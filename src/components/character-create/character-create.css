@@ -58,9 +58,15 @@
   .form-container {
     order: 1;
     margin-bottom: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .slots-container {
     order: 2;
+  }
+
+  .level-input {
+    width: 60px; /* Increase width for better visibility on mobile */
   }
 }

@@ -581,66 +581,77 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               if (!classOption) return null;
 
               return (
-                <Box key={classId} className="level-input-container" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="subtitle1" className="level-label">
+                <Box
+                  key={classId}
+                  className="level-input-container"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' }, // Wrap on mobile screens
+                  }}
+                >
+                  <Typography variant="subtitle1" className="level-label" sx={{ flexBasis: { xs: '100%', sm: 'auto' } }}>
                     {classOption.name} Level:
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() =>
-                      setClassLevels((prevLevels) => ({
-                        ...prevLevels,
-                        [classId]: Math.max(1, (prevLevels[classId] || 1) - 1),
-                      }))
-                    }
-                    sx={{
-                      minWidth: 30,
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      padding: 0,
-                    }}
-                  >
-                    -
-                  </Button>
-                  <TextField
-                    type="text"
-                    variant="outlined"
-                    size="small"
-                    value={classLevels[classId] || 1}
-                    onChange={(e) => {
-                      const value = Math.min(20, Math.max(1, parseInt(e.target.value) || 1));
-                      handleLevelChange(classId, value.toString());
-                    }}
-                    inputProps={{
-                      min: 1,
-                      max: 20,
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                    }}
-                    className="level-input"
-                    sx={{ width: 60 }}
-                  />
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() =>
-                      setClassLevels((prevLevels) => ({
-                        ...prevLevels,
-                        [classId]: (prevLevels[classId] || 1) + 1,
-                      }))
-                    }
-                    sx={{
-                      minWidth: 30,
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      padding: 0,
-                    }}
-                  >
-                    +
-                  </Button>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexBasis: { xs: '100%', sm: 'auto' } }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        setClassLevels((prevLevels) => ({
+                          ...prevLevels,
+                          [classId]: Math.max(1, (prevLevels[classId] || 1) - 1),
+                        }))
+                      }
+                      sx={{
+                        minWidth: 30,
+                        width: 30,
+                        height: 30,
+                        borderRadius: '50%',
+                        padding: 0,
+                      }}
+                    >
+                      -
+                    </Button>
+                    <TextField
+                      type="text"
+                      variant="outlined"
+                      size="small"
+                      value={classLevels[classId] || 1}
+                      onChange={(e) => {
+                        const value = Math.min(20, Math.max(1, parseInt(e.target.value) || 1));
+                        handleLevelChange(classId, value.toString());
+                      }}
+                      inputProps={{
+                        min: 1,
+                        max: 20,
+                        inputMode: 'numeric',
+                        pattern: '[0-9]*',
+                      }}
+                      className="level-input"
+                      sx={{ width: 60 }}
+                    />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        setClassLevels((prevLevels) => ({
+                          ...prevLevels,
+                          [classId]: (prevLevels[classId] || 1) + 1,
+                        }))
+                      }
+                      sx={{
+                        minWidth: 30,
+                        width: 30,
+                        height: 30,
+                        borderRadius: '50%',
+                        padding: 0,
+                      }}
+                    >
+                      +
+                    </Button>
+                  </Box>
                   <Typography variant="subtitle2" sx={{ marginLeft: 2 }}>
                     Spell Save DC: {getSpellSaveDC(classOption.name) ?? "N/A"}
                   </Typography>
