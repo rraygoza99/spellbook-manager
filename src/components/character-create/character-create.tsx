@@ -54,6 +54,8 @@ export default function CharacterCreate(props: CharacterCreateProps) {
   const [classLevels, setClassLevels] = useState<{ [classId: number]: number }>(
     {}
   );
+  const [showFullSpells, setShowFullSpells] = useState(false);
+
 
   const [abilityScores, setAbilityScores] = useState<AbilityScores>({
     intelligence: 10,
@@ -69,6 +71,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
 
   const [selectedAddedSpellTitles, setSelectedAddedSpellTitles] = useState<string[]>([]);
 
+  const [ignoreClassFilter, setIgnoreClassFilter] = useState(false);
 
   const [showSpellTable, setShowSpellTable] = useState(true);
 
@@ -305,8 +308,18 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return abilityModifier + proficiencyBonus;
   }
 
+  function getMaxSpellLevel(characterLevel: number): number {
+    return Math.ceil(characterLevel / 2); // Calculate max spell level
+  }
+
   const availableSpells = useMemo(() => {
-    if (!selectedClasses.length) return [];
+    if (showFullSpells) {
+      return spellsData.map((spell) => ({
+        ...spell,
+        spellLevel: getSpellLevel(spell.tags),
+      })); // Include all spells from the dataset
+    }
+  
     const spells: any[] = [];
     for (const cls of selectedClasses) {
       for (const spell of spellsData) {
@@ -320,6 +333,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
         }
       }
     }
+  
     const unique = new Map();
     for (const s of spells) {
       unique.set(s.title, s);
@@ -327,29 +341,39 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return Array.from(unique.values()).sort(
       (a, b) => a.spellLevel - b.spellLevel || a.title.localeCompare(b.title)
     );
-  }, [selectedClasses, spellsData]);
+  }, [selectedClasses, spellsData, showFullSpells]);
+  
 
   const filteredSpells = useMemo(() => {
-    let spells = availableSpells;
+    let spells = showFullSpells
+      ? spellsData
+          .map((spell) => ({
+            ...spell,
+            spellLevel: getSpellLevel(spell.tags),
+          }))
+          .filter((spell) => {
+            // Ensure spells are filtered by max spell level
+            const maxSpellLevel = getMaxSpellLevel(getTotalCharacterLevel());
+            return spell.spellLevel !== -1 && spell.spellLevel <= maxSpellLevel;
+          })
+      : availableSpells.filter((spell) => {
+          const maxSpellLevel = getMaxSpellLevel(getTotalCharacterLevel());
+          return spell.spellLevel !== -1 && spell.spellLevel <= maxSpellLevel;
+        });
+  
     if (spellNameFilter.trim()) {
       const filter = spellNameFilter.trim().toLowerCase();
       spells = spells.filter((spell) =>
         spell.title.toLowerCase().includes(filter)
       );
     }
+  
     if (levelFilter.length > 0) {
       spells = spells.filter((spell) => levelFilter.includes(spell.spellLevel));
     }
-    if (classFilter.length > 0) {
-      const selectedClassNames = classFilter.map(
-        (classId) => classOptions.find((c) => c.id === classId)?.name
-      );
-      spells = spells.filter((spell) =>
-        selectedClassNames.some((className) => spell.tags.includes(className))
-      );
-    }
+  
     return spells;
-  }, [availableSpells, spellNameFilter, levelFilter, classFilter]);
+  }, [availableSpells, spellNameFilter, levelFilter, showFullSpells, selectedClasses]);
 
   const filteredAddedSpells = useMemo(() => {
     if (levelFilter.length === 0) return addedSpells;
@@ -389,11 +413,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
         ? prev.filter((t) => t !== title)
         : [...prev, title]
     );
-  };
-
-  const handleRemoveSelectedAddedSpells = () => {
-    setAddedSpells((prev) => prev.filter((spell) => !selectedAddedSpellTitles.includes(spell.title)));
-    setSelectedAddedSpellTitles([]);
   };
 
   const saveSpellSlotsToLocalStorage = (characterName: string) => {
@@ -488,10 +507,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return spell.tags.includes("needs_save");
   }
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "light";
-  });
-
   React.useEffect(() => {
     if (characterName) {
       const savedSpellSlots = localStorage.getItem(`spell-slots-${characterName}`);
@@ -505,20 +520,33 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     }
   }, [characterName]);
 
-  const handleRemoveCharacter = (characterNameToRemove: string) => {
-    let arr: any[] = [];
-    try {
-      arr = JSON.parse(localStorage.getItem("character-create-list") || "[]");
-      if (!Array.isArray(arr)) arr = [];
-    } catch {
-      arr = [];
-    }
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
-    const updatedArr = arr.filter((c) => c.characterName !== characterNameToRemove);
-    localStorage.setItem("character-create-list", JSON.stringify(updatedArr));
-
-    localStorage.removeItem(`spell-slots-${characterNameToRemove}`);
-    localStorage.removeItem(`warlock-spell-slots-${characterNameToRemove}`);
+  const sortedSpells = useMemo(() => {
+    if (!sortConfig) return filteredSpells;
+  
+    return [...filteredSpells].sort((a, b) => {
+      if (sortConfig.key === 'title') {
+        return sortConfig.direction === 'asc'
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title);
+      }
+      if (sortConfig.key === 'spellLevel') {
+        return sortConfig.direction === 'asc'
+          ? a.spellLevel - b.spellLevel
+          : b.spellLevel - a.spellLevel;
+      }
+      return 0;
+    });
+  }, [filteredSpells, sortConfig]);
+  
+  const handleSort = (key: string) => {
+    setSortConfig((prev) => {
+      if (prev?.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
   };
 
   return (
@@ -832,14 +860,32 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               Reset Slots
             </Button>
           </Box>
-          <TextField
-            label="Filter by Spell Name"
-            variant="outlined"
-            size="small"
-            value={spellNameFilter}
-            onChange={(e) => setSpellNameFilter(e.target.value)}
-            sx={{ width: 300, marginBottom: 2, marginRight: 2 }}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+            <Checkbox
+              checked={ignoreClassFilter}
+              onChange={(e) => setIgnoreClassFilter(e.target.checked)}
+              color="primary"
+            />
+            <Typography variant="body2" sx={{ marginRight: 2 }}>
+              Use All Classes
+            </Typography>
+            <Checkbox
+              checked={showFullSpells}
+              onChange={(e) => setShowFullSpells(e.target.checked)}
+              color="primary"
+            />
+            <Typography variant="body2" sx={{ marginRight: 2 }}>
+              Show Full Spells List
+            </Typography>
+            <TextField
+              label="Filter by Spell Name"
+              variant="outlined"
+              size="small"
+              value={spellNameFilter}
+              onChange={(e) => setSpellNameFilter(e.target.value)}
+              sx={{ width: 300, marginRight: 2 }}
+            />
+          </Box>
           <TextField
             select
             SelectProps={{
@@ -1011,16 +1057,20 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 <TableHead>
                   <TableRow>
                     <TableCell />
-                    <TableCell>Spell Name</TableCell>
-                    <TableCell>Level</TableCell>
+                    <TableCell onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
+                      Spell Name {sortConfig?.key === 'title' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                    </TableCell>
+                    <TableCell onClick={() => handleSort('spellLevel')} style={{ cursor: 'pointer' }}>
+                      Level {sortConfig?.key === 'spellLevel' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                    </TableCell>
                     <TableCell>Damage</TableCell>
                     <TableCell>Damage Type</TableCell>
                     <TableCell>Saving Throw</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredSpells.length > 0 ? (
-                    filteredSpells.map((spell) => (
+                  {sortedSpells.length > 0 ? (
+                    sortedSpells.map((spell) => (
                       <TableRow key={spell.title}>
                         <TableCell padding="checkbox">
                           <Checkbox

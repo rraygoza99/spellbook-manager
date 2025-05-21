@@ -28,7 +28,6 @@ const classOptions = [
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 function Home() {
-  const [refresh, setRefresh] = useState(0);
 
   function getSavedCharacters(): any[] {
     const arr = localStorage.getItem("character-create-list");
@@ -58,7 +57,6 @@ function Home() {
     localStorage.removeItem(`spell-slots-${characterName}`);
     localStorage.removeItem(`warlock-spell-slots-${characterName}`);
     
-    setRefresh((r) => r + 1);
   }
 
   const savedCharacters = getSavedCharacters();
