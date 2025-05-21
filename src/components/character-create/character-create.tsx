@@ -24,6 +24,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import * as spellSlotTables from "../../resources/spellSlotTables";
 
 const classOptions = [
   { id: 0, name: "Artificer" },
@@ -60,26 +61,21 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     charisma: 10,
   });
 
-  // Add state for spell name filter
   const [spellNameFilter, setSpellNameFilter] = useState("");
   const [selectedSpellTitles, setSelectedSpellTitles] = useState<string[]>([]);
   const [addedSpells, setAddedSpells] = useState<any[]>([]);
-  // Change levelFilter to support multiple levels
   const [levelFilter, setLevelFilter] = useState<number[]>([]);
-  const [classFilter, setClassFilter] = useState<number[]>([]); // Add state for class filter
+  const [classFilter, setClassFilter] = useState<number[]>([]);
 
-  // State for bulk selection of added spells
   const [selectedAddedSpellTitles, setSelectedAddedSpellTitles] = useState<string[]>([]);
 
-  // For select/deselect all logic
 
-  const [showSpellTable, setShowSpellTable] = useState(true); // State to toggle spell table visibility
+  const [showSpellTable, setShowSpellTable] = useState(true);
 
   const toggleSpellTableVisibility = () => {
     setShowSpellTable((prev) => !prev);
   };
 
-  // State for spell slots
   const [spellSlots, setSpellSlots] = useState<{ [level: number]: boolean[] }>({
     1: [false, false],
     2: [false, false],
@@ -92,13 +88,10 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     9: [false],
   });
 
-  // Separate state for Warlock spell slots
   const [warlockSpellSlots, setWarlockSpellSlots] = useState<{ [level: number]: boolean[] }>({});
 
-  // Memoize Warlock spell slots to avoid unnecessary re-renders
   const warlockSpellSlotsMemo = useMemo(() => warlockSpellSlots, [warlockSpellSlots]);
 
-  // Optimized handler to toggle a spell slot
   const toggleSpellSlot = (level: number, index: number) => {
     setSpellSlots((prev) => {
       const currentSlots = prev[level] || Array.from({ length: getMulticlassSpellSlots()[level - 1] || 0 }).fill(false);
@@ -108,7 +101,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     });
   };
 
-  // Optimized handler to toggle a Warlock spell slot
   const toggleWarlockSpellSlot = (level: number, index: number) => {
     setWarlockSpellSlots((prev) => {
       const currentSlots = prev[level] || Array.from({ length: getWarlockSpellSlots(level).slots }).fill(false);
@@ -118,7 +110,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     });
   };
 
-  // Handler to reset all spell slots
   const resetSpellSlots = () => {
     setSpellSlots((prev) =>
       Object.fromEntries(
@@ -130,7 +121,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
   };
 
-  // Optimized handler to reset Warlock spell slots
   const resetWarlockSpellSlots = () => {
     setWarlockSpellSlots({});
   };
@@ -146,13 +136,11 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     setSelectedClassIds(newSelectedIds);
 
     const newLevels = { ...classLevels };
-    // Initialize newly selected classes with level 1
     newSelectedIds.forEach((id) => {
       if (!(id in newLevels)) {
-        newLevels[id] = 1; // Default level
+        newLevels[id] = 1;
       }
     });
-    // Remove levels for deselected classes
     Object.keys(newLevels).forEach((keyStr) => {
       const numKey = Number(keyStr);
       if (!newSelectedIds.includes(numKey)) {
@@ -170,8 +158,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
         [classId]: level,
       }));
     } else if (levelValue === "" || (level < 1 && !isNaN(level))) {
-      // If input is cleared or invalid (e.g., 0 or negative), reset to 1
-      // Or handle as per your specific validation rules (e.g. allow temporary empty)
       setClassLevels((prevLevels) => ({
         ...prevLevels,
         [classId]: 1,
@@ -185,7 +171,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
   ) => {
     const score = parseInt(value, 10);
     if (!isNaN(score) && score >= 1 && score <= 30) {
-      // D&D scores typically 1-30
       setAbilityScores((prevScores) => ({
         ...prevScores,
         [ability]: score,
@@ -210,7 +195,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return -1;
   }
 
-  // Helper to get all spell levels present in a spell list
   function getSpellLevels(spells: any[]) {
     const levels = new Set<number>();
     spells.forEach((spell) => {
@@ -221,7 +205,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return Array.from(levels).sort((a, b) => a - b);
   }
 
-  // Helper to get the spellcasting ability for a class
   function getClassSpellcastingAbility(className: string): keyof AbilityScores | null {
     switch (className) {
       case "Bard":
@@ -241,286 +224,59 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     }
   }
 
-  // Artificer spell slots table
-  const artificerSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [2],
-    3: [3],
-    4: [3],
-    5: [4, 2],
-    6: [4, 2],
-    7: [4, 3],
-    8: [4, 3],
-    9: [4, 3, 2],
-    10: [4, 3, 2],
-    11: [4, 3, 3],
-    12: [4, 3, 3],
-    13: [4, 3, 3, 1],
-    14: [4, 3, 3, 1],
-    15: [4, 3, 3, 2],
-    16: [4, 3, 3, 2],
-    17: [4, 3, 3, 3, 1],
-    18: [4, 3, 3, 3, 1],
-    19: [4, 3, 3, 3, 2],
-    20: [4, 3, 3, 3, 2],
-  };
-
-  // Bard spell slots table
-  const bardSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Cleric spell slots table
-  const clericSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Druid spell slots table
-  const druidSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Paladin spell slots table
-  const paladinSpellSlotsTable: { [level: number]: number[] } = {
-    1: [],
-    2: [2],
-    3: [3],
-    4: [3],
-    5: [4, 2],
-    6: [4, 2],
-    7: [4, 3],
-    8: [4, 3],
-    9: [4, 3, 2],
-    10: [4, 3, 2],
-    11: [4, 3, 3],
-    12: [4, 3, 3],
-    13: [4, 3, 3, 1],
-    14: [4, 3, 3, 1],
-    15: [4, 3, 3, 2],
-    16: [4, 3, 3, 2],
-    17: [4, 3, 3, 3, 1],
-    18: [4, 3, 3, 3, 1],
-    19: [4, 3, 3, 3, 2],
-    20: [4, 3, 3, 3, 2],
-  };
-
-  // Sorcerer spell slots table
-  const sorcererSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Warlock spell slots table
-  const warlockSpellSlotsTable: { [level: number]: { slots: number; slotLevel: number } } = {
-    1: { slots: 1, slotLevel: 1 },
-    2: { slots: 2, slotLevel: 1 },
-    3: { slots: 2, slotLevel: 2 },
-    4: { slots: 2, slotLevel: 2 },
-    5: { slots: 2, slotLevel: 3 },
-    6: { slots: 2, slotLevel: 3 },
-    7: { slots: 2, slotLevel: 4 },
-    8: { slots: 2, slotLevel: 4 },
-    9: { slots: 2, slotLevel: 5 },
-    10: { slots: 2, slotLevel: 5 },
-    11: { slots: 3, slotLevel: 5 },
-    12: { slots: 3, slotLevel: 5 },
-    13: { slots: 3, slotLevel: 5 },
-    14: { slots: 3, slotLevel: 5 },
-    15: { slots: 3, slotLevel: 5 },
-    16: { slots: 3, slotLevel: 5 },
-    17: { slots: 4, slotLevel: 5 },
-    18: { slots: 4, slotLevel: 5 },
-    19: { slots: 4, slotLevel: 5 },
-    20: { slots: 4, slotLevel: 5 },
-  };
-
-  // Wizard spell slots table
-  const wizardSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Multiclass spell slots table
-  const multiclassSpellSlotsTable: { [level: number]: number[] } = {
-    1: [2],
-    2: [3],
-    3: [4, 2],
-    4: [4, 3],
-    5: [4, 3, 2],
-    6: [4, 3, 3],
-    7: [4, 3, 3, 1],
-    8: [4, 3, 3, 2],
-    9: [4, 3, 3, 3, 1],
-    10: [4, 3, 3, 3, 2],
-    11: [4, 3, 3, 3, 2, 1],
-    12: [4, 3, 3, 3, 2, 1],
-    13: [4, 3, 3, 3, 2, 1, 1],
-    14: [4, 3, 3, 3, 2, 1, 1],
-    15: [4, 3, 3, 3, 2, 1, 1, 1],
-    16: [4, 3, 3, 3, 2, 1, 1, 1],
-    17: [4, 3, 3, 3, 2, 1, 1, 1, 1],
-    18: [4, 3, 3, 3, 3, 1, 1, 1, 1],
-    19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
-    20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-  };
-
-  // Helper to calculate effective spellcasting level for multiclassing
   function calculateMulticlassSpellcasterLevel(): number {
     let totalLevel = 0;
 
     selectedClasses.forEach((cls) => {
       if (["Bard", "Cleric", "Druid", "Sorcerer", "Wizard"].includes(cls.id)) {
-        totalLevel += cls.level; // Full caster
+        totalLevel += cls.level;
       } else if (["Paladin", "Ranger"].includes(cls.id)) {
-        totalLevel += Math.floor(cls.level / 2); // Half caster
+        totalLevel += Math.floor(cls.level / 2);
       } else if (["Fighter", "Rogue"].includes(cls.id)) {
-        totalLevel += Math.floor(cls.level / 3); // Third caster (Eldritch Knight/Arcane Trickster)
+        totalLevel += Math.floor(cls.level / 3);
       }
     });
 
-    return Math.min(totalLevel, 20); // Cap at level 20
+    return Math.min(totalLevel, 20);
   }
 
-  // Helper to get spell slots for multiclass spellcasters
   function getMulticlassSpellSlots(): number[] {
     const effectiveLevel = calculateMulticlassSpellcasterLevel();
-    return multiclassSpellSlotsTable[effectiveLevel] || [];
+    return spellSlotTables.multiclassSpellSlotsTable[effectiveLevel] || [];
   }
 
-  // Helper to get spell slots for Artificer based on level
   function getArtificerSpellSlots(level: number): number[] {
-    return artificerSpellSlotsTable[level] || [];
+    return spellSlotTables.artificerSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Bard based on level
   function getBardSpellSlots(level: number): number[] {
-    return bardSpellSlotsTable[level] || [];
+    return spellSlotTables.bardSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Cleric based on level
   function getClericSpellSlots(level: number): number[] {
-    return clericSpellSlotsTable[level] || [];
+    return spellSlotTables.clericSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Druid based on level
   function getDruidSpellSlots(level: number): number[] {
-    return druidSpellSlotsTable[level] || [];
+    return spellSlotTables.druidSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Paladin based on level
   function getPaladinSpellSlots(level: number): number[] {
-    return paladinSpellSlotsTable[level] || [];
+    return spellSlotTables.paladinSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Sorcerer based on level
   function getSorcererSpellSlots(level: number): number[] {
-    return sorcererSpellSlotsTable[level] || [];
+    return spellSlotTables.sorcererSpellSlotsTable[level] || [];
   }
 
-  // Helper to get spell slots for Warlock based on level
   function getWarlockSpellSlots(level: number): { slots: number; slotLevel: number } {
-    return warlockSpellSlotsTable[level] || { slots: 0, slotLevel: 0 };
+    return spellSlotTables.warlockSpellSlotsTable[level] || { slots: 0, slotLevel: 0 };
   }
 
-  // Helper to get spell slots for Wizard based on level
   function getWizardSpellSlots(level: number): number[] {
-    return wizardSpellSlotsTable[level] || [];
+    return spellSlotTables.wizardSpellSlotsTable[level] || [];
   }
 
-  // Helper to calculate proficiency bonus based on total character level
   function getProficiencyBonus(totalLevel: number): number {
     if (totalLevel >= 17) return 6;
     if (totalLevel >= 13) return 5;
@@ -529,12 +285,10 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return 2;
   }
 
-  // Helper to calculate total character level
   function getTotalCharacterLevel(): number {
     return Object.values(classLevels).reduce((sum, level) => sum + level, 0);
   }
 
-  // Helper to calculate spell save DC for a class
   function getSpellSaveDC(className: string): number | null {
     const ability = getClassSpellcastingAbility(className);
     if (!ability) return null;
@@ -543,7 +297,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return 8 + abilityModifier + proficiencyBonus;
   }
 
-  // Helper to calculate spell attack bonus for a class
   function getSpellAttackBonus(className: string): number | null {
     const ability = getClassSpellcastingAbility(className);
     if (!ability) return null;
@@ -578,7 +331,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
   }, [selectedClasses, spellsData]);
 
-  // Filtered spells by spell name, level, and class
   const filteredSpells = useMemo(() => {
     let spells = availableSpells;
     if (spellNameFilter.trim()) {
@@ -601,13 +353,11 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return spells;
   }, [availableSpells, spellNameFilter, levelFilter, classFilter]);
 
-  // Filtered added spells by level (multi-select)
   const filteredAddedSpells = useMemo(() => {
     if (levelFilter.length === 0) return addedSpells;
     return addedSpells.filter((spell) => levelFilter.includes(spell.spellLevel));
   }, [addedSpells, levelFilter]);
 
-  // Handler for selecting/deselecting a spell
   const handleSpellSelect = (title: string) => {
     setSelectedSpellTitles((prev) =>
       prev.includes(title)
@@ -616,7 +366,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
   };
 
-  // Handler for Add Spells button
   const handleAddSpells = () => {
     setAddedSpells((prev) => {
       const newSpells = [
@@ -627,18 +376,15 @@ export default function CharacterCreate(props: CharacterCreateProps) {
             !prev.some((s) => s.title === spell.title)
         ),
       ];
-      // Sort spells by level
       return newSpells.sort((a, b) => a.spellLevel - b.spellLevel);
     });
     setSelectedSpellTitles([]);
   };
 
-  // Handler to remove a spell from addedSpells by title
   const handleRemoveAddedSpell = (title: string) => {
     setAddedSpells((prev) => prev.filter((spell) => spell.title !== title));
   };
 
-  // Handler for selecting/deselecting a spell in the Added Spells table
   const handleAddedSpellSelect = (title: string) => {
     setSelectedAddedSpellTitles((prev) =>
       prev.includes(title)
@@ -647,19 +393,16 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
   };
 
-  // Handler to remove selected spells in bulk from addedSpells
   const handleRemoveSelectedAddedSpells = () => {
     setAddedSpells((prev) => prev.filter((spell) => !selectedAddedSpellTitles.includes(spell.title)));
     setSelectedAddedSpellTitles([]);
   };
 
-  // Save spell slots for the current character to local storage after saving the character
   const saveSpellSlotsToLocalStorage = (characterName: string) => {
     localStorage.setItem(`spell-slots-${characterName}`, JSON.stringify(spellSlots));
     localStorage.setItem(`warlock-spell-slots-${characterName}`, JSON.stringify(warlockSpellSlots));
   };
 
-  // Handler to save character data to localStorage as JSON
   const handleSaveToLocalStorage = () => {
     const characterData = {
       characterName,
@@ -668,7 +411,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
       abilityScores,
       addedSpells,
     };
-    // Load list, update or add, and save back
     let arr: any[] = [];
     try {
       arr = JSON.parse(localStorage.getItem("character-create-list") || "[]");
@@ -684,13 +426,11 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     }
     localStorage.setItem("character-create-list", JSON.stringify(arr));
 
-    // Save spell slots after saving the character
     saveSpellSlotsToLocalStorage(characterName);
 
     if (props.onSave) props.onSave(characterData);
   };
 
-  // Handler to reset all fields for a new character
   const handleNewCharacter = () => {
     setCharacterName("");
     setSelectedClassIds([]);
@@ -702,7 +442,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     setLevelFilter([]);
   };
 
-  // Load initial data if provided (for editing)
   React.useEffect(() => {
     if (props.initialData) {
       setCharacterName(props.initialData.characterName || "");
@@ -751,12 +490,10 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return spell.tags.includes("needs_save");
   }
 
-  // State for theme selection
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "light";
   });
 
-  // Load spell slots for the current character from local storage
   React.useEffect(() => {
     if (characterName) {
       const savedSpellSlots = localStorage.getItem(`spell-slots-${characterName}`);
@@ -770,7 +507,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     }
   }, [characterName]);
 
-  // Handler to remove a character and its associated spell slot data
   const handleRemoveCharacter = (characterNameToRemove: string) => {
     let arr: any[] = [];
     try {
@@ -780,11 +516,9 @@ export default function CharacterCreate(props: CharacterCreateProps) {
       arr = [];
     }
 
-    // Remove the character from the list
     const updatedArr = arr.filter((c) => c.characterName !== characterNameToRemove);
     localStorage.setItem("character-create-list", JSON.stringify(updatedArr));
 
-    // Remove associated spell slot data
     localStorage.removeItem(`spell-slots-${characterNameToRemove}`);
     localStorage.removeItem(`warlock-spell-slots-${characterNameToRemove}`);
   };
@@ -1013,7 +747,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               </Box>
             ) : null}
 
-            {/* Always show Warlock spell slots if present */}
             {selectedClasses
               .filter((cls) => cls.id === "Warlock")
               .map((cls) => {
@@ -1040,7 +773,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 );
               })}
 
-            {/* Handle other classes */}
             {selectedClasses.length === 1 &&(
             selectedClasses
               .filter((cls) => cls.id !== "Warlock")
@@ -1091,8 +823,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               Reset Slots
             </Button>
           </Box>
-
-          {/* Filters */}
           <TextField
             label="Filter by Spell Name"
             variant="outlined"
@@ -1213,7 +943,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                       <TableCell>Damage</TableCell>
                       <TableCell>Damage Type</TableCell>
                       <TableCell>Saving Throw</TableCell>
-                      <TableCell /> {/* Remove button column */}
+                      <TableCell />
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1258,8 +988,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               </TableContainer>
             </Box>
           )}
-
-          {/* Toggle Available Spells Table */}
           <Button
             variant="outlined"
             color="primary"
@@ -1268,8 +996,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
           >
             {showSpellTable ? "Hide Available Spells Table" : "Show Available Spells Table"}
           </Button>
-          
-          {/* Available Spells Table */}
           {showSpellTable && (
             <TableContainer component={Paper} sx={{ marginTop: 2, width: "100%" }}>
               <Table size="small">
