@@ -398,13 +398,46 @@ export default function CharacterCreate(props: CharacterCreateProps) {
             !prev.some((s) => s.title === spell.title)
         ),
       ];
-      return newSpells.sort((a, b) => a.spellLevel - b.spellLevel);
+      const sortedSpells = newSpells.sort((a, b) => a.spellLevel - b.spellLevel);
+      saveCharacterToLocalStorage(sortedSpells); // Save updated addedSpells to local storage
+      return sortedSpells;
     });
     setSelectedSpellTitles([]);
   };
 
+  const saveCharacterToLocalStorage = (updatedAddedSpells: any[]) => {
+    const characterData = {
+      characterName,
+      selectedClassIds,
+      classLevels,
+      abilityScores,
+      addedSpells: updatedAddedSpells,
+    };
+  
+    let characterList: any[] = [];
+    try {
+      characterList = JSON.parse(localStorage.getItem("character-create-list") || "[]");
+      if (!Array.isArray(characterList)) characterList = [];
+    } catch {
+      characterList = [];
+    }
+  
+    const index = characterList.findIndex((c) => c.characterName === characterName);
+    if (index !== -1) {
+      characterList[index] = characterData;
+    } else {
+      characterList.push(characterData);
+    }
+  
+    localStorage.setItem("character-create-list", JSON.stringify(characterList));
+  };
+
   const handleRemoveAddedSpell = (title: string) => {
-    setAddedSpells((prev) => prev.filter((spell) => spell.title !== title));
+    setAddedSpells((prev) => {
+      const updatedSpells = prev.filter((spell) => spell.title !== title);
+      saveCharacterToLocalStorage(updatedSpells); // Save updated addedSpells to local storage
+      return updatedSpells;
+    });
   };
 
   const handleAddedSpellSelect = (title: string) => {
@@ -861,14 +894,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
             </Button>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
-            <Checkbox
-              checked={ignoreClassFilter}
-              onChange={(e) => setIgnoreClassFilter(e.target.checked)}
-              color="primary"
-            />
-            <Typography variant="body2" sx={{ marginRight: 2 }}>
-              Use All Classes
-            </Typography>
             <Checkbox
               checked={showFullSpells}
               onChange={(e) => setShowFullSpells(e.target.checked)}
