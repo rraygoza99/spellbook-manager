@@ -25,6 +25,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import * as spellSlotTables from "../../resources/spellSlotTables";
+import SpellDetailsModal from "../spell-details-modal/spell-details-modal";
 
 const classOptions = [
   { id: 0, name: "Artificer" },
@@ -70,8 +71,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
   const [classFilter, setClassFilter] = useState<number[]>([]);
 
   const [selectedAddedSpellTitles, setSelectedAddedSpellTitles] = useState<string[]>([]);
-
-  const [ignoreClassFilter, setIgnoreClassFilter] = useState(false);
 
   const [showSpellTable, setShowSpellTable] = useState(true);
 
@@ -511,6 +510,9 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
     return damageMatch ? damageMatch.match(/(\d+d\d+)/)[0] : "";
   }
+  function getSpellConcentration(spell: any): boolean {
+    return spell.tags.includes("concentration");
+  }
 
   function getDamageType(spell: any): string {
     const damageTypes = [
@@ -580,6 +582,16 @@ export default function CharacterCreate(props: CharacterCreateProps) {
       }
       return { key, direction: 'asc' };
     });
+  };
+
+  const [selectedSpellDetails, setSelectedSpellDetails] = useState<any | null>(null); // State for modal
+
+  const handleSpellClick = (spell: any) => {
+    setSelectedSpellDetails(spell); // Set the selected spell details
+  };
+
+  const handleCloseModal = () => {
+    setSelectedSpellDetails(null); // Close the modal
   };
 
   return (
@@ -1020,6 +1032,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                       </TableCell>
                       <TableCell>Spell Name</TableCell>
                       <TableCell>Level</TableCell>
+                      <TableCell>Needs concentration?</TableCell>
                       <TableCell>Damage</TableCell>
                       <TableCell>Damage Type</TableCell>
                       <TableCell>Saving Throw</TableCell>
@@ -1029,11 +1042,18 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                   <TableBody>
                     {filteredAddedSpells.length > 0 ? (
                       filteredAddedSpells.map((spell) => (
-                        <TableRow key={spell.title}>
+                        <TableRow
+                          key={spell.title}
+                          onClick={() => handleSpellClick(spell)}
+                          style={{ cursor: "pointer" }}
+                        >
                           <TableCell padding="checkbox">
                             <Checkbox
                               checked={selectedAddedSpellTitles.includes(spell.title)}
-                              onChange={() => handleAddedSpellSelect(spell.title)}
+                              onChange={(e) => {
+                                e.stopPropagation(); // Prevent modal from opening on checkbox click
+                                handleAddedSpellSelect(spell.title);
+                              }}
                               color="primary"
                             />
                           </TableCell>
@@ -1041,6 +1061,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                           <TableCell>
                             {spell.spellLevel === 0 ? "Cantrip" : spell.spellLevel}
                           </TableCell>
+                          <TableCell>{getSpellConcentration(spell) ? "✔" : "✘"}</TableCell>
                           <TableCell>{getSpellDamage(spell)}</TableCell>
                           <TableCell>{getDamageType(spell)}</TableCell>
                           <TableCell>{needsSavingThrow(spell) ? "✔" : "✘"}</TableCell>
@@ -1049,7 +1070,10 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                               variant="outlined"
                               color="error"
                               size="small"
-                              onClick={() => handleRemoveAddedSpell(spell.title)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent modal from opening on button click
+                                handleRemoveAddedSpell(spell.title);
+                              }}
                             >
                               Remove
                             </Button>
@@ -1088,6 +1112,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                     <TableCell onClick={() => handleSort('spellLevel')} style={{ cursor: 'pointer' }}>
                       Level {sortConfig?.key === 'spellLevel' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
                     </TableCell>
+                    <TableCell>Needs concentration?</TableCell>
                     <TableCell>Damage</TableCell>
                     <TableCell>Damage Type</TableCell>
                     <TableCell>Saving Throw</TableCell>
@@ -1096,18 +1121,20 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                 <TableBody>
                   {sortedSpells.length > 0 ? (
                     sortedSpells.map((spell) => (
-                      <TableRow key={spell.title}>
+                      <TableRow key={spell.title} onClick={() => handleSpellClick(spell)} style={{ cursor: "pointer" }}>
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={selectedSpellTitles.includes(spell.title)}
                             onChange={() => handleSpellSelect(spell.title)}
                             color="primary"
+                            onClick={(e) => e.stopPropagation()} // Prevent modal from opening on checkbox click
                           />
                         </TableCell>
                         <TableCell>{spell.title}</TableCell>
                         <TableCell>
                           {spell.spellLevel === 0 ? "Cantrip" : spell.spellLevel}
                         </TableCell>
+                        <TableCell>{getSpellConcentration(spell) ? "✔" : "✘"}</TableCell>
                         <TableCell>{getSpellDamage(spell)}</TableCell>
                         <TableCell>{getDamageType(spell)}</TableCell>
                         <TableCell>{needsSavingThrow(spell) ? "✔" : "✘"}</TableCell>
@@ -1129,6 +1156,14 @@ export default function CharacterCreate(props: CharacterCreateProps) {
           </Box>
         </Box>
       )}
+      <SpellDetailsModal
+        spell={selectedSpellDetails}
+        onClose={handleCloseModal}
+        getSpellConcentration={getSpellConcentration}
+        getSpellDamage={getSpellDamage}
+        getDamageType={getDamageType}
+        needsSavingThrow={needsSavingThrow}
+      />
     </Box>
   );
 }
