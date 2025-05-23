@@ -1044,7 +1044,11 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                       filteredAddedSpells.map((spell) => (
                         <TableRow
                           key={spell.title}
-                          onClick={() => handleSpellClick(spell)}
+                          onClick={(e) => {
+                            if (!(e.target as HTMLElement).closest('input[type="checkbox"]')) {
+                              handleSpellClick(spell);
+                            }
+                          }}
                           style={{ cursor: "pointer" }}
                         >
                           <TableCell padding="checkbox">
