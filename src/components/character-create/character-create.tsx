@@ -2,7 +2,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import { OutlinedInput, TextField, Typography } from "@mui/material";
 import { Button } from "@mui/material";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
 import { FormControl } from "@mui/material";
@@ -94,23 +94,37 @@ export default function CharacterCreate(props: CharacterCreateProps) {
 
   const warlockSpellSlotsMemo = useMemo(() => warlockSpellSlots, [warlockSpellSlots]);
 
-  const toggleSpellSlot = (level: number, index: number) => {
-    setSpellSlots((prev) => {
-      const currentSlots = prev[level] || Array.from({ length: getMulticlassSpellSlots()[level - 1] || 0 }).fill(false);
+  const toggleSlot = (
+    level: number,
+    index: number,
+    slots: { [level: number]: boolean[] },
+    setSlots: React.Dispatch<React.SetStateAction<{ [level: number]: boolean[] }>>,
+    getSlotCount: (level: number) => number
+  ) => {
+    setSlots((prev) => {
+      const currentSlots = prev[level] || Array.from({ length: getSlotCount(level) }).fill(false);
       const updatedSlots = [...currentSlots];
       updatedSlots[index] = !updatedSlots[index];
-      return { ...prev, [level]: updatedSlots };
+      const newSlots = { ...prev, [level]: updatedSlots };
+      saveSpellSlotsToLocalStorage(characterName, newSlots); // Pass updated state directly
+      return newSlots;
     });
   };
 
-  const toggleWarlockSpellSlot = (level: number, index: number) => {
-    setWarlockSpellSlots((prev) => {
-      const currentSlots = prev[level] || Array.from({ length: getWarlockSpellSlots(level).slots }).fill(false);
-      const updatedSlots = [...currentSlots];
-      updatedSlots[index] = !updatedSlots[index];
-      return { ...prev, [level]: updatedSlots };
-    });
-  };
+  // Use toggleSlot for spell slots
+  const toggleSpellSlot = useCallback(
+    (level: number, index: number) => {
+      toggleSlot(level, index, spellSlots, setSpellSlots, (lvl) => getMulticlassSpellSlots()[lvl - 1] || 0);
+    },
+    [spellSlots, setSpellSlots, characterName]
+  );
+
+  const toggleWarlockSpellSlot = useCallback(
+    (level: number, index: number) => {
+      toggleSlot(level, index, warlockSpellSlots, setWarlockSpellSlots, (lvl) => getWarlockSpellSlots(lvl).slots);
+    },
+    [warlockSpellSlots, setWarlockSpellSlots, characterName]
+  );
 
   const resetSpellSlots = () => {
     setSpellSlots((prev) =>
@@ -247,6 +261,19 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     return spellSlotTables.multiclassSpellSlotsTable[effectiveLevel] || [];
   }
 
+  const getSpellSlots = (cls: any) => {
+    const spellSlotTablesMap: { [key: string]: (level: number) => number[] } = {
+      Artificer: getArtificerSpellSlots,
+      Bard: getBardSpellSlots,
+      Cleric: getClericSpellSlots,
+      Druid: getDruidSpellSlots,
+      Paladin: getPaladinSpellSlots,
+      Sorcerer: getSorcererSpellSlots,
+      Wizard: getWizardSpellSlots,
+    };
+    return spellSlotTablesMap[cls.id]?.(cls.level) || [];
+  };
+
   function getArtificerSpellSlots(level: number): number[] {
     return spellSlotTables.artificerSpellSlotsTable[level] || [];
   }
@@ -308,7 +335,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
   }
 
   function getMaxSpellLevel(characterLevel: number): number {
-    return Math.ceil(characterLevel / 2); // Calculate max spell level
+    return Math.ceil(characterLevel / 2);
   }
 
   const availableSpells = useMemo(() => {
@@ -316,7 +343,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
       return spellsData.map((spell) => ({
         ...spell,
         spellLevel: getSpellLevel(spell.tags),
-      })); // Include all spells from the dataset
+      }));
     }
   
     const spells: any[] = [];
@@ -351,7 +378,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
             spellLevel: getSpellLevel(spell.tags),
           }))
           .filter((spell) => {
-            // Ensure spells are filtered by max spell level
             const maxSpellLevel = getMaxSpellLevel(getTotalCharacterLevel());
             return spell.spellLevel !== -1 && spell.spellLevel <= maxSpellLevel;
           })
@@ -398,7 +424,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
         ),
       ];
       const sortedSpells = newSpells.sort((a, b) => a.spellLevel - b.spellLevel);
-      saveCharacterToLocalStorage(sortedSpells); // Save updated addedSpells to local storage
+      saveCharacterToLocalStorage(sortedSpells);
       return sortedSpells;
     });
     setSelectedSpellTitles([]);
@@ -447,8 +473,8 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     );
   };
 
-  const saveSpellSlotsToLocalStorage = (characterName: string) => {
-    localStorage.setItem(`spell-slots-${characterName}`, JSON.stringify(spellSlots));
+  const saveSpellSlotsToLocalStorage = (characterName: string, updatedSlots: { [level: number]: boolean[] }) => {
+    localStorage.setItem(`spell-slots-${characterName}`, JSON.stringify(updatedSlots));
     localStorage.setItem(`warlock-spell-slots-${characterName}`, JSON.stringify(warlockSpellSlots));
   };
 
@@ -475,7 +501,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     }
     localStorage.setItem("character-create-list", JSON.stringify(arr));
 
-    saveSpellSlotsToLocalStorage(characterName);
 
     if (props.onSave) props.onSave(characterData);
   };
@@ -557,24 +582,26 @@ export default function CharacterCreate(props: CharacterCreateProps) {
 
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
-  const sortedSpells = useMemo(() => {
-    if (!sortConfig) return filteredSpells;
-  
-    return [...filteredSpells].sort((a, b) => {
-      if (sortConfig.key === 'title') {
-        return sortConfig.direction === 'asc'
-          ? a.title.localeCompare(b.title)
-          : b.title.localeCompare(a.title);
-      }
-      if (sortConfig.key === 'spellLevel') {
-        return sortConfig.direction === 'asc'
-          ? a.spellLevel - b.spellLevel
-          : b.spellLevel - a.spellLevel;
-      }
-      return 0;
-    });
-  }, [filteredSpells, sortConfig]);
-  
+  // Refactor sorting logic
+  const sortSpells = useCallback(
+    (spells: any[]) => {
+      if (!sortConfig) return spells;
+      return [...spells].sort((a, b) => {
+        const { key, direction } = sortConfig;
+        if (key === "title") {
+          return direction === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+        }
+        if (key === "spellLevel") {
+          return direction === "asc" ? a.spellLevel - b.spellLevel : b.spellLevel - a.spellLevel;
+        }
+        return 0;
+      });
+    },
+    [sortConfig]
+  );
+
+  const sortedSpells = useMemo(() => sortSpells(filteredSpells), [filteredSpells, sortSpells]);
+
   const handleSort = (key: string) => {
     setSortConfig((prev) => {
       if (prev?.key === key) {
@@ -584,15 +611,24 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     });
   };
 
-  const [selectedSpellDetails, setSelectedSpellDetails] = useState<any | null>(null); // State for modal
+  const [selectedSpellDetails, setSelectedSpellDetails] = useState<any | null>(null);
 
   const handleSpellClick = (spell: any) => {
-    setSelectedSpellDetails(spell); // Set the selected spell details
+    setSelectedSpellDetails(spell);
   };
 
   const handleCloseModal = () => {
-    setSelectedSpellDetails(null); // Close the modal
+    setSelectedSpellDetails(null);
   };
+
+  const handleRowClick = useCallback(
+    (spell: any, e: React.MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('input[type="checkbox"]')) {
+        handleSpellClick(spell);
+      }
+    },
+    [handleSpellClick]
+  );
 
   return (
     <Box className="character-create-container" sx={{ width: "100%" }}>
@@ -661,7 +697,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    flexWrap: { xs: 'wrap', sm: 'nowrap' }, // Wrap on mobile screens
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
                   }}
                 >
                   <Typography variant="subtitle1" className="level-label" sx={{ flexBasis: { xs: '100%', sm: 'auto' } }}>
@@ -859,22 +895,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
             selectedClasses
               .filter((cls) => cls.id !== "Warlock")
               .map((cls) => {
-                const slots =
-                  cls.id === "Artificer"
-                    ? getArtificerSpellSlots(cls.level)
-                    : cls.id === "Bard"
-                    ? getBardSpellSlots(cls.level)
-                    : cls.id === "Cleric"
-                    ? getClericSpellSlots(cls.level)
-                    : cls.id === "Druid"
-                    ? getDruidSpellSlots(cls.level)
-                    : cls.id === "Paladin"
-                    ? getPaladinSpellSlots(cls.level)
-                    : cls.id === "Sorcerer"
-                    ? getSorcererSpellSlots(cls.level)
-                    : cls.id === "Wizard"
-                    ? getWizardSpellSlots(cls.level)
-                    : [];
+                const slots = getSpellSlots(cls);
 
                 return slots.map((slotCount, level) => (
                   <Box key={level} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -1075,7 +1096,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                               color="error"
                               size="small"
                               onClick={(e) => {
-                                e.stopPropagation(); // Prevent modal from opening on button click
+                                e.stopPropagation();
                                 handleRemoveAddedSpell(spell.title);
                               }}
                             >
@@ -1131,7 +1152,7 @@ export default function CharacterCreate(props: CharacterCreateProps) {
                             checked={selectedSpellTitles.includes(spell.title)}
                             onChange={() => handleSpellSelect(spell.title)}
                             color="primary"
-                            onClick={(e) => e.stopPropagation()} // Prevent modal from opening on checkbox click
+                            onClick={(e) => e.stopPropagation()}
                           />
                         </TableCell>
                         <TableCell>{spell.title}</TableCell>

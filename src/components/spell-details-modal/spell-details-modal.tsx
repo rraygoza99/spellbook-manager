@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Backdrop, Fade, Box, Typography } from "@mui/material";
+import { Modal, Backdrop, Fade, Box, Typography, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import './spell-details-modal.css';
 
 interface SpellDetailsModalProps {
@@ -115,13 +116,26 @@ export default function SpellDetailsModal({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "60%",
+            width: "90%", // Adjust width for mobile
+            maxWidth: "600px", // Limit max width
+            maxHeight: "90vh", // Limit height for scrolling
+            overflowY: "auto", // Enable scrolling
             bgcolor: "background.paper",
             border: "2px solid #000",
             boxShadow: 24,
             p: 4,
           }}
         >
+          <IconButton
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           {spell && (
             <>
               <Typography variant="h6" component="h2">
