@@ -630,6 +630,16 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     [handleSpellClick]
   );
 
+  // Load custom spells on component mount
+  React.useEffect(() => {
+    const customSpells = JSON.parse(localStorage.getItem("custom-spells") || "[]");
+    customSpells.forEach((spell: any) => {
+      if (!spellsData.find(s => s.title === spell.title)) {
+        spellsData.push(spell);
+      }
+    });
+  }, []);
+
   return (
     <Box className="character-create-container" sx={{ width: "100%" }}>
       <Accordion defaultExpanded>
@@ -832,7 +842,6 @@ export default function CharacterCreate(props: CharacterCreateProps) {
               >
                 New Character
               </Button>
-              
             </Box>
           </Box>
         </AccordionDetails>
@@ -1192,3 +1201,4 @@ export default function CharacterCreate(props: CharacterCreateProps) {
     </Box>
   );
 }
+                              
