@@ -158,6 +158,9 @@ function App() {
   });
 
   const [showCustomSpellModal, setShowCustomSpellModal] = useState(false);
+  const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [importData, setImportData] = useState<any>(null);
   const [customSpellData, setCustomSpellData] = useState({
     title: "",
     level: "Cantrips",
@@ -240,6 +243,108 @@ function App() {
     setShowCustomSpellModal(false);
   };
 
+  const handleClearAllData = () => {
+    localStorage.removeItem("character-create-list");
+    localStorage.removeItem("character-create-data");
+    localStorage.removeItem("custom-spells");
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("spell-slots-") || key.startsWith("warlock-spell-slots-")) {
+        localStorage.removeItem(key);
+      }
+    });
+    setShowClearDataConfirm(false);
+    window.location.reload();
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      characters: JSON.parse(localStorage.getItem("character-create-list") || "[]"),
+      customSpells: JSON.parse(localStorage.getItem("custom-spells") || "[]"),
+      spellSlots: {} as any,
+      warlockSpellSlots: {} as any,
+      exportDate: new Date().toISOString()
+    };
+
+    // Export spell slots data
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("spell-slots-")) {
+        const characterName = key.replace("spell-slots-", "");
+        exportData.spellSlots[characterName] = JSON.parse(localStorage.getItem(key) || "{}");
+      } else if (key.startsWith("warlock-spell-slots-")) {
+        const characterName = key.replace("warlock-spell-slots-", "");
+        exportData.warlockSpellSlots[characterName] = JSON.parse(localStorage.getItem(key) || "{}");
+      }
+    });
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `spellbook-manager-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        setImportData(data);
+        setShowImportConfirm(true);
+      } catch (error) {
+        alert("Invalid JSON file. Please select a valid export file.");
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset the input
+    event.target.value = '';
+  };
+
+  const handleConfirmImport = () => {
+    if (!importData) return;
+
+    try {
+      // Import characters
+      if (importData.characters && Array.isArray(importData.characters)) {
+        localStorage.setItem("character-create-list", JSON.stringify(importData.characters));
+      }
+
+      // Import custom spells
+      if (importData.customSpells && Array.isArray(importData.customSpells)) {
+        localStorage.setItem("custom-spells", JSON.stringify(importData.customSpells));
+      }
+
+      // Import spell slots
+      if (importData.spellSlots && typeof importData.spellSlots === 'object') {
+        Object.entries(importData.spellSlots).forEach(([characterName, slots]) => {
+          localStorage.setItem(`spell-slots-${characterName}`, JSON.stringify(slots));
+        });
+      }
+
+      // Import warlock spell slots
+      if (importData.warlockSpellSlots && typeof importData.warlockSpellSlots === 'object') {
+        Object.entries(importData.warlockSpellSlots).forEach(([characterName, slots]) => {
+          localStorage.setItem(`warlock-spell-slots-${characterName}`, JSON.stringify(slots));
+        });
+      }
+
+      setShowImportConfirm(false);
+      setImportData(null);
+      window.location.reload();
+    } catch (error) {
+      alert("Error importing data. Please check the file format.");
+    }
+  };
+
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
@@ -286,18 +391,28 @@ function App() {
               </Button>
               <Button
                 variant="outlined"
+                color="secondary"
+                onClick={handleExportData}
+              >
+                Export Data
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                component="label"
+              >
+                Import Data
+                <input
+                  type="file"
+                  accept=".json"
+                  hidden
+                  onChange={handleImportFile}
+                />
+              </Button>
+              <Button
+                variant="outlined"
                 color="error"
-                onClick={() => {
-                  localStorage.removeItem("character-create-list");
-                  localStorage.removeItem("character-create-data");
-                  localStorage.removeItem("custom-spells");
-                  Object.keys(localStorage).forEach((key) => {
-                    if (key.startsWith("spell-slots-") || key.startsWith("warlock-spell-slots-")) {
-                      localStorage.removeItem(key);
-                    }
-                  });
-                  window.location.reload();
-                }}
+                onClick={() => setShowClearDataConfirm(true)}
               >
                 Clear All Data
               </Button>
@@ -319,6 +434,73 @@ function App() {
               <Route path="*" element={<Home />} />
             </Routes>
           </Box>
+
+          {/* Import Confirmation Modal */}
+          <Dialog
+            open={showImportConfirm}
+            onClose={() => setShowImportConfirm(false)}
+          >
+            <DialogTitle>Confirm Import Data</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to import this data? This will replace:
+              </Typography>
+              <Box component="ul" sx={{ mt: 1, mb: 1 }}>
+                <Typography component="li">All saved characters ({importData?.characters?.length || 0} characters)</Typography>
+                <Typography component="li">All custom spells ({importData?.customSpells?.length || 0} spells)</Typography>
+                <Typography component="li">All spell slot progress</Typography>
+              </Box>
+              <Typography color="warning.main">
+                Your current data will be overwritten.
+              </Typography>
+              {importData?.exportDate && (
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Export date: {new Date(importData.exportDate).toLocaleString()}
+                </Typography>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setShowImportConfirm(false)}>Cancel</Button>
+              <Button 
+                onClick={handleConfirmImport}
+                variant="contained"
+                color="primary"
+              >
+                Import Data
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Clear Data Confirmation Modal */}
+          <Dialog
+            open={showClearDataConfirm}
+            onClose={() => setShowClearDataConfirm(false)}
+          >
+            <DialogTitle>Confirm Clear All Data</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to clear all data? This will permanently delete:
+              </Typography>
+              <Box component="ul" sx={{ mt: 1, mb: 1 }}>
+                <Typography component="li">All saved characters</Typography>
+                <Typography component="li">All spell slot progress</Typography>
+                <Typography component="li">All custom spells</Typography>
+              </Box>
+              <Typography color="error">
+                This action cannot be undone.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setShowClearDataConfirm(false)}>Cancel</Button>
+              <Button 
+                onClick={handleClearAllData}
+                variant="contained"
+                color="error"
+              >
+                Clear All Data
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Custom Spell Modal */}
           <Dialog
