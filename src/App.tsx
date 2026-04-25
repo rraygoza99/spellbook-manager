@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react
 import { Box, Button, Typography, Switch, FormControlLabel, CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox, Chip } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CharacterCreate from "./components/character-create/character-create";
+import RiftboundScore from "./components/riftbound-score/riftbound-score";
 import spellsData from "./resources/modified_spells.json";
 
 function getCharacterByName(name: string) {
@@ -381,6 +382,9 @@ function App() {
               <Button component={Link} to="/character-spellbook">
                 Character Spellbook
               </Button>
+              <Button component={Link} to="/riftbound-score">
+                Riftbound Score
+              </Button>
               <Box sx={{ flex: 1 }} />
               <Button
                 variant="outlined"
@@ -431,6 +435,7 @@ function App() {
             <Routes>
               <Route path="/home" element={<Home />} />
               <Route path="/character-spellbook" element={<CharacterCreateWithQuery />} />
+              <Route path="/riftbound-score" element={<RiftboundScore />} />
               <Route path="*" element={<Home />} />
             </Routes>
           </Box>

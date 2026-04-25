@@ -1,0 +1,499 @@
+﻿/* ======================================================
+   RIFTBOUND SCORE — Setup Screen
+   ====================================================== */
+
+.rb-setup {
+  min-height: calc(100vh - 72px);
+  background: var(--rb-bg);
+  color: var(--rb-text);
+  padding: 20px 16px 36px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.rb-setup-title {
+  color: var(--rb-text) !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 24px !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Mode tabs */
+.rb-mode-tabs {
+  display: flex;
+  background: var(--rb-surface2);
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 2px;
+}
+
+.rb-mode-btn {
+  flex: 1 !important;
+  border-radius: 50px !important;
+  color: var(--rb-text-muted) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  padding: 7px 2px !important;
+  min-width: 0 !important;
+  text-transform: none !important;
+  line-height: 1.3 !important;
+  transition: all 0.2s !important;
+}
+
+.rb-mode-btn--active {
+  background: var(--rb-mode-active-bg) !important;
+  color: var(--rb-text) !important;
+}
+
+/* Section labels */
+.rb-section-label {
+  color: var(--rb-text-muted) !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 10px !important;
+  margin-top: 4px !important;
+}
+
+/* Players list */
+.rb-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.rb-player-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--rb-surface);
+  border: 1px solid var(--rb-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.rb-player-avatar {
+  width: 44px;
+  height: 56px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.rb-player-avatar:hover {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45);
+}
+
+.rb-player-name-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.rb-name-click-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.rb-player-name-text {
+  color: var(--rb-text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+.rb-edit-icon {
+  font-size: 0.85rem !important;
+  color: var(--rb-icon-color) !important;
+}
+
+.rb-color-swatch {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid var(--rb-swatch-border);
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.rb-color-swatch:hover {
+  border-color: var(--rb-swatch-hover);
+}
+
+/* Options card */
+.rb-options-card {
+  background: var(--rb-surface);
+  border: 1px solid var(--rb-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.rb-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--rb-border-subtle);
+}
+
+.rb-option-row--last {
+  border-bottom: none;
+}
+
+.rb-option-label {
+  color: var(--rb-text) !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+
+/* Stepper */
+.rb-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--rb-surface3);
+  border-radius: 50px;
+  padding: 3px 4px;
+}
+
+.rb-stepper-btn {
+  color: var(--rb-icon-color) !important;
+}
+
+.rb-stepper-value {
+  color: var(--rb-text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* Bottom actions */
+.rb-bottom-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rb-launch-btn {
+  width: 100% !important;
+  border-radius: 50px !important;
+  background: #2979ff !important;
+  color: #fff !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  padding: 14px !important;
+  text-transform: none !important;
+  letter-spacing: 0.4px !important;
+  box-shadow: 0 4px 20px rgba(41, 121, 255, 0.4) !important;
+}
+
+.rb-reset-btn {
+  color: var(--rb-reset-color) !important;
+  font-size: 0.82rem !important;
+  text-transform: none !important;
+}
+
+/* ======================================================
+   RIFTBOUND SCORE — Game Screen
+   ====================================================== */
+
+.rb-game-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 1300;
+  background: var(--rb-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Player panel */
+.rb-player-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  user-select: none;
+  isolation: isolate;
+}
+
+.rb-player-panel--flipped {
+  transform: rotate(180deg);
+}
+
+/* Multi-player row */
+.rb-panel-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+}
+
+.rb-panel-row > .rb-player-panel {
+  flex: 1;
+}
+
+.rb-panel-row > .rb-player-panel:not(:last-child) {
+  border-right: 1px solid var(--rb-panel-divider);
+}
+
+/* Player name badge */
+.rb-player-badge {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--rb-badge-bg);
+  border: 1.5px solid var(--rb-badge-border);
+  border-radius: 50px;
+  padding: 5px 20px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.rb-player-badge-text {
+  color: var(--rb-text) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+}
+
+/* XP bar */
+.rb-xp-bar {
+  position: absolute;
+  top: 58px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--rb-xp-bg);
+  border-radius: 20px;
+  padding: 3px 10px;
+  z-index: 2;
+}
+
+.rb-xp-label {
+  color: var(--rb-text-muted) !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+}
+
+.rb-xp-value {
+  color: var(--rb-text) !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  min-width: 18px;
+  text-align: center;
+}
+
+.rb-xp-btn {
+  color: var(--rb-icon-color) !important;
+  padding: 1px !important;
+}
+
+/* Score row */
+.rb-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.rb-score-btn {
+  width: 64px !important;
+  height: 64px !important;
+  flex-shrink: 0 !important;
+  background: var(--rb-score-btn-bg) !important;
+  border: 1px solid var(--rb-score-btn-border) !important;
+  color: var(--rb-score-btn-color) !important;
+  transition: transform 0.08s !important;
+}
+
+.rb-score-btn:active {
+  transform: scale(0.9) !important;
+}
+
+.rb-score-icon {
+  font-size: 1.8rem !important;
+}
+
+.rb-score-number {
+  font-size: clamp(3.8rem, 15vw, 7rem) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+  transition: color 0.3s !important;
+  min-width: 1ch;
+  text-align: center;
+  flex-shrink: 1;
+}
+
+/* Progress dots */
+.rb-dots {
+  position: absolute;
+  bottom: 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 20px;
+  max-width: 100%;
+  z-index: 2;
+}
+
+.rb-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  transition: background 0.25s;
+}
+
+/* Conquer / Hold action buttons */
+.rb-action-row {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.rb-action-btn {
+  border-radius: 50px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  padding: 5px 18px !important;
+  min-width: 80px !important;
+  transition: transform 0.08s !important;
+  backdrop-filter: blur(4px);
+}
+
+.rb-action-btn:active {
+  transform: scale(0.92) !important;
+}
+
+.rb-conquer-btn {
+  background: rgba(76, 175, 80, 0.18) !important;
+  border: 1.5px solid rgba(76, 175, 80, 0.55) !important;
+  color: #6fcf71 !important;
+}
+
+.rb-hold-btn {
+  background: rgba(41, 121, 255, 0.18) !important;
+  border: 1.5px solid rgba(41, 121, 255, 0.55) !important;
+  color: #6fa8ff !important;
+}
+
+/* Middle control bar */
+.rb-middle-bar {
+  height: 56px;
+  min-height: 56px;
+  background: var(--rb-bar-bg);
+  border-top: 1px solid var(--rb-bar-border);
+  border-bottom: 1px solid var(--rb-bar-border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.rb-bar-icon-btn {
+  color: var(--rb-icon-color) !important;
+  padding: 8px !important;
+}
+
+.rb-timer-pill {
+  color: var(--rb-pill-color) !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  background: var(--rb-pill-bg) !important;
+  border-radius: 20px !important;
+  padding: 4px 10px !important;
+  min-width: 80px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.rb-toss-pill {
+  color: var(--rb-pill-color) !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  background: var(--rb-pill-bg) !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+}
+
+/* Flipped panel: keep dots at visual bottom */
+.rb-player-panel--flipped .rb-dots {
+  bottom: auto;
+  top: 14px;
+}
+
+/* ======================================================
+   Responsive
+   ====================================================== */
+
+@media (max-width: 380px) {
+  .rb-score-btn {
+    width: 54px !important;
+    height: 54px !important;
+  }
+  .rb-score-icon {
+    font-size: 1.5rem !important;
+  }
+  .rb-timer-pill {
+    min-width: 68px !important;
+    font-size: 0.7rem !important;
+  }
+  .rb-toss-pill {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+  }
+  .rb-mode-btn {
+    font-size: 0.62rem !important;
+  }
+}
+
+@media (max-height: 600px) {
+  .rb-player-badge {
+    top: 8px;
+  }
+  .rb-score-btn {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  .rb-dots {
+    bottom: 6px;
+  }
+}
