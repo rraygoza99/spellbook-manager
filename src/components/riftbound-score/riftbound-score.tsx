@@ -325,9 +325,6 @@ function GameView({ players, mode, maxPoints, useXp, timer, timerRunning, tossOp
           <HistoryIcon sx={{ fontSize: 20, color: isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.6)" }} />
         </Badge>
       </IconButton>
-      <Button className="rb-toss-pill" onClick={onToss} startIcon={<CasinoIcon sx={{ fontSize: 15 }} />}>
-        Toss
-      </Button>
     </Box>
   );
 
@@ -777,18 +774,7 @@ export default function RiftboundScore() {
                   loading="lazy"
                   style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", objectPosition: "top", display: "block" }}
                 />
-                <Typography sx={{
-                  textAlign: "center",
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  py: 0.5,
-                  px: 0.5,
-                  color: isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.7)",
-                  background: isDark ? "#14142a" : "#e0e0ee",
-                  lineHeight: 1.2,
-                }}>
-                  {legend.name === "Legend" ? legend.id : legend.name}
-                </Typography>
+                
               </Box>
             ))}
           </Box>
