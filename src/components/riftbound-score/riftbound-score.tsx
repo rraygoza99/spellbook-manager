@@ -229,8 +229,8 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
         {flipped
           ? <>
               <Box className="rb-action-row">
-                <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
-                <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
+                <Button className="rb-action-btn rb-conquer-btn" onClick={() => { onLogAction(player.id, "Conquer"); }}>Conquer</Button>
+                <Button className="rb-action-btn rb-hold-btn" onClick={() => { onLogAction(player.id, "Hold"); }}>Hold</Button>
               </Box>
               <Box className="rb-score-row">
                 <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, -1); }} disableRipple><RemoveIcon className="rb-score-icon" /></IconButton>
@@ -245,8 +245,8 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
                 <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, 1); }} disableRipple><AddIcon className="rb-score-icon" /></IconButton>
               </Box>
               <Box className="rb-action-row">
-                <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
-                <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
+                <Button className="rb-action-btn rb-conquer-btn" onClick={() => { onLogAction(player.id, "Conquer"); }}>Conquer</Button>
+                <Button className="rb-action-btn rb-hold-btn" onClick={() => { onLogAction(player.id, "Hold"); }}>Hold</Button>
               </Box>
             </>
         }
@@ -539,6 +539,8 @@ export default function RiftboundScore() {
     ]);
     if (action === "Conquer") {
       setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, score: newScore } : p)));
+    } else if (action === "Hold") {
+      setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, score: p.score + 1 } : p)));
     }
   }
 
