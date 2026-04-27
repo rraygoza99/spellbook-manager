@@ -76,7 +76,7 @@ function getLegendUrl(id: string): string {
 
 type GameMode = "2p" | "solo" | "3p" | "4p";
 type AppView = "setup" | "game";
-type LogAction = "Conquer" | "Hold";
+type LogAction = "Conquer" | "Hold" | "+1" | "-1";
 
 interface LogEntry {
   id: string;
@@ -228,9 +228,17 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, position: "relative", zIndex: 1, width: "100%" }}>
         {flipped ? (
           <>
-            <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
-              {player.score}
-            </Typography>
+            <Box className="rb-score-row">
+              <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onLogAction(player.id, "-1"); }} disableRipple>
+                <RemoveIcon className="rb-score-icon" />
+              </IconButton>
+              <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
+                {player.score}
+              </Typography>
+              <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onLogAction(player.id, "+1"); }} disableRipple>
+                <AddIcon className="rb-score-icon" />
+              </IconButton>
+            </Box>
             <Box className="rb-action-row">
               <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
               <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
@@ -238,9 +246,17 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
           </>
         ) : (
           <>
-            <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
-              {player.score}
-            </Typography>
+            <Box className="rb-score-row">
+              <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onLogAction(player.id, "-1"); }} disableRipple>
+                <RemoveIcon className="rb-score-icon" />
+              </IconButton>
+              <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
+                {player.score}
+              </Typography>
+              <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onLogAction(player.id, "+1"); }} disableRipple>
+                <AddIcon className="rb-score-icon" />
+              </IconButton>
+            </Box>
             <Box className="rb-action-row">
               <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
               <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
@@ -414,7 +430,7 @@ function GameView({ players, mode, maxPoints, useXp, timer, timerRunning, tossOp
                   <Typography sx={{
                     fontWeight: 700,
                     fontSize: "0.78rem",
-                    color: entry.action === "Conquer" ? "#4caf50" : "#2979ff",
+                    color: entry.action === "Conquer" || entry.action === "+1" ? "#4caf50" : entry.action === "-1" ? "#ef5350" : "#2979ff",
                     minWidth: 60,
                     textAlign: "right",
                   }}>
@@ -518,7 +534,13 @@ export default function RiftboundScore() {
   function handleLogAction(playerId: string, action: LogAction) {
     tryVibrate();
     const player = players.find((p) => p.id === playerId)!;
-    const newScore = action === "Conquer" ? Math.min(player.score + 1, maxPoints) : player.score;
+    let newScore = player.score;
+    if (action === "Conquer" || action === "Hold" || action === "+1") {
+      newScore = Math.min(player.score + 1, maxPoints);
+    } else if (action === "-1") {
+      newScore = Math.max(player.score - 1, 0);
+    }
+    setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, score: newScore } : p)));
     setLog((l) => [
       ...l,
       {
@@ -531,11 +553,6 @@ export default function RiftboundScore() {
         gameTime: timer,
       },
     ]);
-    if (action === "Conquer") {
-      setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, score: newScore } : p)));
-    } else if (action === "Hold") {
-      setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, score: p.score + 1 } : p)));
-    }
   }
 
   function startEdit(player: Player) {
