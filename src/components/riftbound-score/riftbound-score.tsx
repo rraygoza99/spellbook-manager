@@ -226,30 +226,27 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
       )}
 
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, position: "relative", zIndex: 1, width: "100%" }}>
-        {flipped
-          ? <>
-              <Box className="rb-action-row">
-                <Button className="rb-action-btn rb-conquer-btn" onClick={() => { onLogAction(player.id, "Conquer"); }}>Conquer</Button>
-                <Button className="rb-action-btn rb-hold-btn" onClick={() => { onLogAction(player.id, "Hold"); }}>Hold</Button>
-              </Box>
-              <Box className="rb-score-row">
-                <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, -1); }} disableRipple><RemoveIcon className="rb-score-icon" /></IconButton>
-                <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>{player.score}</Typography>
-                <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, 1); }} disableRipple><AddIcon className="rb-score-icon" /></IconButton>
-              </Box>
-            </>
-          : <>
-              <Box className="rb-score-row">
-                <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, -1); }} disableRipple><RemoveIcon className="rb-score-icon" /></IconButton>
-                <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>{player.score}</Typography>
-                <IconButton className="rb-score-btn" onClick={() => { tryVibrate(); onChangeScore(player.id, 1); }} disableRipple><AddIcon className="rb-score-icon" /></IconButton>
-              </Box>
-              <Box className="rb-action-row">
-                <Button className="rb-action-btn rb-conquer-btn" onClick={() => { onLogAction(player.id, "Conquer"); }}>Conquer</Button>
-                <Button className="rb-action-btn rb-hold-btn" onClick={() => { onLogAction(player.id, "Hold"); }}>Hold</Button>
-              </Box>
-            </>
-        }
+        {flipped ? (
+          <>
+            <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
+              {player.score}
+            </Typography>
+            <Box className="rb-action-row">
+              <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
+              <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Typography className="rb-score-number" style={{ color: atMax ? player.color : (isDark ? "#ffffff" : "#111111") }}>
+              {player.score}
+            </Typography>
+            <Box className="rb-action-row">
+              <Button className="rb-action-btn rb-conquer-btn" onClick={() => onLogAction(player.id, "Conquer")}>Conquer</Button>
+              <Button className="rb-action-btn rb-hold-btn" onClick={() => onLogAction(player.id, "Hold")}>Hold</Button>
+            </Box>
+          </>
+        )}
       </Box>
 
       {maxPoints <= 14 && (
