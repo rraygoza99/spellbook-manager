@@ -216,11 +216,11 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
         <Box className="rb-xp-bar">
           <Typography className="rb-xp-label">XP</Typography>
           <IconButton size="small" className="rb-xp-btn" onClick={() => onChangeXp(player.id, -1)}>
-            <RemoveIcon sx={{ fontSize: 13 }} />
+            <RemoveIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <Typography className="rb-xp-value">{player.xp}</Typography>
           <IconButton size="small" className="rb-xp-btn" onClick={() => onChangeXp(player.id, 1)}>
-            <AddIcon sx={{ fontSize: 13 }} />
+            <AddIcon sx={{ fontSize: 22 }} />
           </IconButton>
         </Box>
       )}
@@ -265,17 +265,6 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
         )}
       </Box>
 
-      {maxPoints <= 14 && (
-        <Box className="rb-dots">
-          {Array.from({ length: maxPoints }, (_, i) => (
-            <Box
-              key={i}
-              className="rb-dot"
-              style={{ background: i < player.score ? player.color : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)") }}
-            />
-          ))}
-        </Box>
-      )}
     </Box>
   );
 }

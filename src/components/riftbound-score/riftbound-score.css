@@ -293,31 +293,31 @@
   right: 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   background: var(--rb-xp-bg);
-  border-radius: 20px;
-  padding: 3px 10px;
+  border-radius: 28px;
+  padding: 8px 18px;
   z-index: 2;
 }
 
 .rb-xp-label {
   color: var(--rb-text-muted) !important;
-  font-size: 0.62rem !important;
+  font-size: 0.9rem !important;
   font-weight: 700 !important;
   letter-spacing: 1px !important;
 }
 
 .rb-xp-value {
   color: var(--rb-text) !important;
-  font-size: 0.85rem !important;
+  font-size: 1.3rem !important;
   font-weight: 700 !important;
-  min-width: 18px;
+  min-width: 26px;
   text-align: center;
 }
 
 .rb-xp-btn {
   color: var(--rb-icon-color) !important;
-  padding: 1px !important;
+  padding: 6px !important;
 }
 
 /* Score row */
@@ -358,26 +358,6 @@
   min-width: 1ch;
   text-align: center;
   flex-shrink: 1;
-}
-
-/* Progress dots */
-.rb-dots {
-  position: absolute;
-  bottom: 14px;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 0 20px;
-  max-width: 100%;
-  z-index: 2;
-}
-
-.rb-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  transition: background 0.25s;
 }
 
 /* Conquer / Hold action buttons */
@@ -457,16 +437,15 @@
   padding: 4px 12px !important;
 }
 
-/* Flipped panel: name badge at physical top of screen (= CSS bottom after 180deg) */
+/* Flipped panel: name badge near divider (= CSS top, same as Player 1) */
 .rb-player-panel--flipped .rb-player-badge {
-  top: auto;
-  bottom: 14px;
-}
-
-/* Flipped panel: keep dots at visual bottom */
-.rb-player-panel--flipped .rb-dots {
-  bottom: auto;
   top: 14px;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  width: auto;
+  margin: 0;
+  transform: translateX(-50%);
 }
 
 /* Flipped panel: XP at physical top-left of screen (= CSS bottom-right after 180deg) */
@@ -509,8 +488,5 @@
   .rb-score-btn {
     width: 56px !important;
     height: 56px !important;
-  }
-  .rb-dots {
-    bottom: 6px;
   }
 }
