@@ -404,15 +404,15 @@
 }
 
 .rb-conquer-btn {
-  background: rgba(76, 175, 80, 0.18) !important;
+  background: rgba(76, 175, 79, 0.75) !important;
   border: 1.5px solid rgba(76, 175, 80, 0.55) !important;
-  color: #6fcf71 !important;
+  color: #ffffff !important;
 }
 
 .rb-hold-btn {
-  background: rgba(41, 121, 255, 0.18) !important;
+  background: rgba(41, 121, 255, 0.75) !important;
   border: 1.5px solid rgba(41, 121, 255, 0.55) !important;
-  color: #6fa8ff !important;
+  color: #ffffff !important;
 }
 
 /* Middle control bar */
