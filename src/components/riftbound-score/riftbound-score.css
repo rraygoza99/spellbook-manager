@@ -290,6 +290,7 @@
 .rb-xp-bar {
   position: absolute;
   bottom: 14px;
+  right: 16px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -462,10 +463,12 @@
   top: 14px;
 }
 
-/* Flipped panel: keep XP at visual top */
+/* Flipped panel: keep XP at visual bottom-right (= CSS top-left after 180deg) */
 .rb-player-panel--flipped .rb-xp-bar {
   bottom: auto;
   top: 14px;
+  right: auto;
+  left: 16px;
 }
 
 /* ======================================================
