@@ -457,18 +457,24 @@
   padding: 4px 12px !important;
 }
 
+/* Flipped panel: name badge at physical top of screen (= CSS bottom after 180deg) */
+.rb-player-panel--flipped .rb-player-badge {
+  top: auto;
+  bottom: 14px;
+}
+
 /* Flipped panel: keep dots at visual bottom */
 .rb-player-panel--flipped .rb-dots {
   bottom: auto;
   top: 14px;
 }
 
-/* Flipped panel: keep XP at visual bottom-right (= CSS top-left after 180deg) */
+/* Flipped panel: XP at physical top-left of screen (= CSS bottom-right after 180deg) */
 .rb-player-panel--flipped .rb-xp-bar {
-  bottom: auto;
-  top: 14px;
-  right: auto;
-  left: 16px;
+  bottom: 14px;
+  right: 16px;
+  top: auto;
+  left: auto;
 }
 
 /* ======================================================
