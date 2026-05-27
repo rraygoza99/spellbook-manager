@@ -289,7 +289,7 @@
 /* XP bar */
 .rb-xp-bar {
   position: absolute;
-  top: 58px;
+  bottom: 14px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -458,6 +458,12 @@
 
 /* Flipped panel: keep dots at visual bottom */
 .rb-player-panel--flipped .rb-dots {
+  bottom: auto;
+  top: 14px;
+}
+
+/* Flipped panel: keep XP at visual top */
+.rb-player-panel--flipped .rb-xp-bar {
   bottom: auto;
   top: 14px;
 }

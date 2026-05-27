@@ -214,10 +214,10 @@ function PlayerPanel({ player, flipped, maxPoints, useXp, onChangeScore, onChang
 
       {useXp && (
         <Box className="rb-xp-bar">
+          <Typography className="rb-xp-label">XP</Typography>
           <IconButton size="small" className="rb-xp-btn" onClick={() => onChangeXp(player.id, -1)}>
             <RemoveIcon sx={{ fontSize: 13 }} />
           </IconButton>
-          <Typography className="rb-xp-label">XP</Typography>
           <Typography className="rb-xp-value">{player.xp}</Typography>
           <IconButton size="small" className="rb-xp-btn" onClick={() => onChangeXp(player.id, 1)}>
             <AddIcon sx={{ fontSize: 13 }} />
